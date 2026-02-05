@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace TMG.Survivors
 {
+    public struct InitializeCharacterFlag : IComponentData, IEnableableComponent { }
+
     public struct CharacterMoveDirection : IComponentData
     {
         public float2 value;
@@ -26,6 +28,7 @@ namespace TMG.Survivors
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
 
                 AddComponent<CharacterMoveDirection>(entity);
+                AddComponent<InitializeCharacterFlag>(entity);
                 AddComponent(entity, new CharacterMoveSpeed
                 {
                     value = authoring.moveSpeed
@@ -34,11 +37,24 @@ namespace TMG.Survivors
         }
     }
 
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    public partial struct CharacterInitializationSystem : ISystem
+    {
+        public void OnUpdate(ref SystemState state)
+        {
+
+            foreach (var (mass, flag) in SystemAPI.Query<RefRW<PhysicsMass>, EnabledRefRW<InitializeCharacterFlag>>())
+            {
+                mass.ValueRW.InverseInertia = float3.zero;
+                flag.ValueRW = false;
+            }
+        }
+    }
+
     public partial struct CharacterMoveSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)
         {
-            var deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (var (velocity, direction, speed) in SystemAPI.Query<RefRW<PhysicsVelocity>,CharacterMoveDirection, CharacterMoveSpeed>())
             {
