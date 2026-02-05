@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Burst;
 using UnityEngine;
 
 namespace TMG.Survivors
@@ -40,6 +41,7 @@ namespace TMG.Survivors
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct CharacterInitializationSystem : ISystem
     {
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
 
@@ -53,9 +55,9 @@ namespace TMG.Survivors
 
     public partial struct CharacterMoveSystem : ISystem
     {
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
-        {
-
+        {        
             foreach (var (velocity, direction, speed) in SystemAPI.Query<RefRW<PhysicsVelocity>,CharacterMoveDirection, CharacterMoveSpeed>())
             {
                 var moveStep2d = direction.value * speed.value;
