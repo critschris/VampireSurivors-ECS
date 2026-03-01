@@ -64,8 +64,10 @@ namespace TMG.Survivors
         }
     }
 
+    //System Base (cause using reference outside of entity world)
     public partial class PlayerInputSystem : SystemBase
     {
+        //Is a input handler in Settings folder
         private SurvivorInput _input;
 
         protected override void OnCreate()
@@ -74,6 +76,7 @@ namespace TMG.Survivors
             _input.Enable();
         }
 
+        //Updating movedirection for all entities with player tag
         protected override void OnUpdate()
         {
             var currInput = (float2) _input.Player.Move.ReadValue<Vector2>();
