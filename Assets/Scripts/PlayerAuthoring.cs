@@ -24,6 +24,7 @@ namespace TMG.Survivors
 
                 AddComponent<PlayerTag>(entity);
                 AddComponent<InitializeCameraTargetTag>(entity);
+                AddComponent<CameraTarget>(entity);
             }
         }
     }

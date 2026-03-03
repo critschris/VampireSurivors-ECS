@@ -3,6 +3,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Burst;
 using UnityEngine;
+using Unity.Rendering;
 
 namespace TMG.Survivors
 {
@@ -15,6 +16,12 @@ namespace TMG.Survivors
     }
 
     public struct CharacterMoveSpeed : IComponentData
+    {
+        public float value;
+    }
+
+    [MaterialProperty("_FacingDirection")]
+    public struct FacingDirectionOverride : IComponentData
     {
         public float value;
     }
@@ -35,6 +42,10 @@ namespace TMG.Survivors
                 AddComponent(entity, new CharacterMoveSpeed
                 {
                     value = authoring.moveSpeed
+                });
+                AddComponent(entity, new FacingDirectionOverride
+                {
+                    value = 1
                 });
             }
         }
@@ -66,10 +77,18 @@ namespace TMG.Survivors
         public void OnUpdate(ref SystemState state)
         {
             //Query to find entities with PhysicsVelocity, CharacterMoveDirection and CharacterMoveSpeed
-            foreach (var (velocity, direction, speed) in SystemAPI.Query<RefRW<PhysicsVelocity>,CharacterMoveDirection, CharacterMoveSpeed>())
+            foreach (var (velocity, facing, direction, speed) in SystemAPI.Query<RefRW<PhysicsVelocity>, RefRW<FacingDirectionOverride>,CharacterMoveDirection, CharacterMoveSpeed>())
             {
+                //moving in movestep2d direction
                 var moveStep2d = direction.value * speed.value;
                 velocity.ValueRW.Linear = new float3(moveStep2d,0f);
+
+                //Updating facing direction whenever movement over threshold was passed
+                if (math.abs(moveStep2d.x) > 0.15f)
+                {
+                    facing.ValueRW.value = math.sign(moveStep2d.x);
+                }
+
             }
         }
     }
